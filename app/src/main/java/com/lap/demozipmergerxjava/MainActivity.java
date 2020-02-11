@@ -6,10 +6,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Func1;
 import rx.functions.Func3;
 import rx.functions.FuncN;
 
@@ -44,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void zip() {
-        Observable.zip(createObservable(1), createObservable(2), createObservable(3),
+        Observable.zip(createObservable(1), createObservable(2), createObservableError(3),
                 new Func3<Integer, Integer, Integer, DataZip>() {
                     @Override
                     public DataZip call(Integer integer, Integer integer2, Integer integer3) {
@@ -58,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onError(Throwable e) {
-
+                Log.d("dLog", "MainActivity.java:  onError: "+e.getMessage());
             }
 
             @Override
@@ -92,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void merge() {
-        Observable.merge(createObservable(1), createObservable(2), createObservable(3))
+        Observable.merge(createObservable(1), createObservable(2), createObservableError(3))
                 .subscribe(new Subscriber<Integer>() {
                     @Override
                     public void onCompleted() {
@@ -100,12 +104,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     @Override
                     public void onError(Throwable e) {
-
+                        Log.d("dLog", "MainActivity.java:  onError: "+e.getMessage());
                     }
 
                     @Override
                     public void onNext(Integer integer) {
-                        Log.i("MainActivity", " -> onNext: ----------------: " + integer);
+                        Log.d("dLog", "MainActivity.java:  onNext: "+integer);
                         txtMerge.setText(txtMerge.getText() + " " + integer);
                     }
                 });
@@ -125,13 +129,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onNext(Object o) {
-                txtMergeList.setText(txtMergeList.getText() + " " +  o);
+                txtMergeList.setText(txtMergeList.getText() + " " + o);
             }
         });
     }
 
     private Observable<Integer> createObservable(int data) {
         return Observable.just(data);
+    }
+
+    private Observable<Integer> createObservableError(int data) {
+        return Observable.error(new Throwable("error test"));
     }
 
     private List<Observable<?>> createListObservable() {
